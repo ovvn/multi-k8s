@@ -1,0 +1,36 @@
+language: generic
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t ovvn/multi-docker -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run -e CI=true ovvn/multi-docker yarn run test
+
+after_success:
+  - docker build -t ovvn/multi-client ./client
+  - docker build -t ovvn/multi-nginx ./nginx
+  - docker build -t ovvn/multi-server ./server
+  - docker build -t ovvn/multi-worker ./worker
+  # Log in to the docker CLI
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  # Take those images and push them to docker hub
+  - docker push ovvn/multi-client
+  - docker push ovvn/multi-nginx
+  - docker push ovvn/multi-server
+  - docker push ovvn/multi-worker
+
+deploy:
+  provider: elasticbeanstalk
+  region: "us-east-1"
+  app: "multi-docker"
+  env: "DockerReact-env"
+  bucket_name: "elasticbeanstalk-us-east-1-577402871189"
+  bucket_path: "multi-docker"
+  on:
+    branch: master
+  access_key_id: $AWS_ACCESS_KEY
+  secret_access_key:
+    secure: "$AWS_SECRET_KEY"
