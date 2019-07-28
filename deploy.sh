@@ -1,6 +1,7 @@
 docker build -t ovvn/multi-client:latest -t ovvn/multi-client:$SHA -f ./client/Dockerfile ./client
 docker build -t ovvn/multi-server:latest -t ovvn/multi-server:$SHA -f ./server/Dockerfile ./server
 docker build -t ovvn/multi-worker:latest -t ovvn/multi-worker:$SHA -f ./worker/Dockerfile ./worker
+
 docker push ovvn/multi-client:latest
 docker push ovvn/multi-server:latest
 docker push ovvn/multi-worker:latest
